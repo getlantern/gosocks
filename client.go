@@ -13,8 +13,9 @@ type ClientAuthenticator interface {
 }
 
 type SocksDialer struct {
-	Timeout time.Duration
-	Auth    ClientAuthenticator
+	Timeout     time.Duration
+	Auth        ClientAuthenticator
+	DialTimeout func(network, addr string, timeout time.Duration) (net.Conn, error)
 }
 
 type AnonymousClientAuthenticator struct{}
@@ -45,7 +46,7 @@ func (a *AnonymousClientAuthenticator) ClientAuthenticate(conn *SocksConn) (err 
 }
 
 func (d *SocksDialer) Dial(address string) (conn *SocksConn, err error) {
-	c, err := net.DialTimeout("tcp", address, d.Timeout)
+	c, err := d.DialTimeout("tcp", address, d.Timeout)
 	if err != nil {
 		return
 	}
